@@ -17,7 +17,6 @@ class User(Base):
                         nullable=False, server_default=text('now()'))
 
 
-
 class Post(Base):
     __tablename__ = "posts"
     id = Column(Integer, primary_key=True, nullable=False)
@@ -29,3 +28,13 @@ class Post(Base):
     owner_id = Column(Integer, ForeignKey(
         f"{User.__tablename__}.id", ondelete="CASCADE"), nullable=False)
     owner = relationship("User")
+
+
+class Vote(Base):
+    __tablename__ = "votes"
+    user_id = Column(Integer, ForeignKey(
+        f"{User.__tablename__}.id", ondelete="CASCADE"), primary_key=True, nullable=False)
+    post_id = Column(Integer, ForeignKey(
+        f"{Post.__tablename__}.id", ondelete="CASCADE"), primary_key=True, nullable=False)
+    
+

@@ -6,6 +6,7 @@
 # -- UPDATE products SET name = 'DVD players' WHERE id = 2 RETURNING *;
 
 # uvicorn main:app --reload
+# select posts.title, posts.id as post_id, COUNT(votes.post_id) as votes_count from posts LEFT JOIN votes ON posts.id = votes.post_id GROUP BY posts.id;
 
 #JWT:
 # Server creates a signature based on Server-API-password, header, and payload
@@ -17,7 +18,7 @@ from fastapi import FastAPI
 from .passwords.main import get_password
 from . import models
 from .database import engine
-from .routers import post, user, auth
+from .routers import post, user, auth, vote
 from .config import settings
 
 # this creates a 'posts' table in postgres is none exists
@@ -30,6 +31,7 @@ password = get_password("app/passwords/key.key",
 app.include_router(post.router)
 app.include_router(user.router)
 app.include_router(auth.router)
+app.include_router(vote.router)
 
 
 @app.get("/")
