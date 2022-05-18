@@ -2,13 +2,15 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from .passwords.main import get_password
+from .config import settings
 
 password = get_password("app/passwords/key.key",
                         "app/passwords/encrypted_pass.txt")
 
 # SQLALCHEMY_DATABASE_URL = 'postgresql://username:password@ip-address/db_name'
 
-SQLALCHEMY_DATABASE_URL = f'postgresql://postgres:{password}@localhost/fastapi'
+# SQLALCHEMY_DATABASE_URL = f'postgresql://postgres:{password}@localhost/fastapi'
+SQLALCHEMY_DATABASE_URL = f'postgresql://{settings.db_username}:{password}@{settings.db_hostname}:{settings.db_port}/{settings.db_name}'
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -21,5 +23,16 @@ def get_db():
         yield db
     finally:
         db.close()
+
+# In order to connect to db using psycopg postgres driver
+# try:
+#     conn = psycopg2.connect(host='localhost', database='fastapi', user='postgres',
+#                             password=password, cursor_factory=RealDictCursor)
+#     cursor = conn.cursor()
+#     print("Database connection was successful!")
+# except Exception as error:
+#     print("Connecting to database failed")
+#     print("Error: " + error)
+#     exit()
 
 

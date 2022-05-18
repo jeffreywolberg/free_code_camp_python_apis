@@ -1,5 +1,6 @@
 venv/
 app/passwords/key.key
-__pycache__/*
+__pycache__
 app/__pycache__/*
-
+.env
+app/routers/__pycache__/*

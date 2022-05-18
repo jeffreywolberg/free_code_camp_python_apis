@@ -4,6 +4,7 @@ from . import schemas, database, models
 from fastapi import Depends, status, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
+from .config import settings
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
@@ -11,9 +12,9 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 #Crypto_Algorithm
 #Expieration
 
-SECRET_KEY = "568798gvw9try245010bwb0ww720tyg02078h2807b2hthvwkbz"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 120
+SECRET_KEY = settings.secret_key
+ALGORITHM = settings.algorithm
+ACCESS_TOKEN_EXPIRE_MINUTES=settings.access_token_expire_minutes
 
 def create_access_token(data: dict):
   to_encode = data.copy()
@@ -38,6 +39,8 @@ def verify_access_token(token: str, credentials_exception):
   
   return token_data
 
+# The reason we have this get_current_user function despite the fact that it is just verifying the access token
+# is because after we verify access token we may want to grab the user that sent it and return it
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(database.get_db)):
   
   credentials_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, 
