@@ -1,14 +1,3 @@
-from os import stat
-from typing import Optional
-from fastapi import FastAPI, Response, status, HTTPException
-from fastapi.params import Body
-from pydantic import BaseModel
-from random import randrange
-import psycopg2
-from psycopg2.extras import RealDictCursor
-from cryptography.fernet import Fernet
-from .passwords.main import get_password
-
 # -- SELECT * FROM products WHERE price > 40 ORDER BY created_at DESC LIMIT 4 OFFSET 2;
 # -- INSERT INTO products (name, price, inventory) VALUES ('Ball', 30, 20), ('Computer', 1000, 40) returning id;
 # -- SELECT * FROM products;
@@ -18,15 +7,30 @@ from .passwords.main import get_password
 
 # uvicorn main:app --reload
 
+#JWT:
+# Server creates a signature based on Server-API-password, header, and payload
+# User will not be able to recreate a proper signature because he doesn't have
+# the Server-API-password. The server can easily check if a signature is valid
+
+
+from typing import Optional, List
+from fastapi import FastAPI, Response, status, HTTPException, Depends
+from fastapi.params import Body
+from pydantic import BaseModel
+from random import randrange
+import psycopg2
+from psycopg2.extras import RealDictCursor
+from sqlalchemy.orm import Session
+from .passwords.main import get_password
+
+from .database import engine, get_db
+from . import models, schemas, utils
+from .routers import post, user, auth
+
+
+# this creates a 'posts' table in postgres is none exists
+models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
-
-
-class Post(BaseModel):
-    title: str
-    content: str
-    published: bool = True  # optional with default value
-    rating: Optional[int] = None  # optional without default value
-
 
 password = get_password("app/passwords/key.key",
                         "app/passwords/encrypted_pass.txt")
@@ -41,76 +45,15 @@ except Exception as error:
     print("Error: " + error)
     exit()
 
-
-my_posts = [{"title": "T", "content": "C", "id": 1}]
-
-
-def find_post(id):
-    for p in my_posts:
-        if p['id'] == id:
-            return p
-
-
-def find_index_post(id):
-    for i, p in enumerate(my_posts):
-        if p['id'] == id:
-            return i
+app.include_router(post.router)
+app.include_router(user.router)
+app.include_router(auth.router)
 
 
 @app.get("/")
 async def root():
     return {"message": "Hello Wold"}
 
-
-@app.get("/posts")
-def get_posts():
-    cursor.execute("SELECT * FROM posts")
-    posts = cursor.fetchall()
-    print(posts)
-    return {"data": posts}
-
-
-@app.post("/posts", status_code=status.HTTP_201_CREATED)
-def create_post(post: Post):
-    cursor.execute("INSERT INTO posts (title, content, published) VALUES (%s, %s, %s) RETURNING *",
-                   (post.title, post.content, post.published))
-    new_post = cursor.fetchone()
-    conn.commit()
-    return {"new_post": new_post}
-
-
-@app.get("/posts/{id}")
-def get_post(id: int):
-    cursor.execute("SELECT * FROM posts WHERE id = %s", (id,))
-    post = cursor.fetchone()
-    print(post)
-    if not post:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"Post with id {id} was not found")
-    return {"Post": post}
-
-
-@app.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_post(id: int):
-    cursor.execute("DELETE FROM posts WHERE id = %s RETURNING *", (id, ))
-    post = cursor.fetchone()
-    if post is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"Post with id {id} could not be deleted")
-    conn.commit()
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
-
-
-@app.patch("/posts/{id}", status_code=status.HTTP_202_ACCEPTED)
-def update_post(id: int, post: Post):
-    sql_cmd = "UPDATE posts SET title = %s, content = %s, published = %s WHERE id = %s RETURNING *"
-    cursor.execute(sql_cmd, (post.title, post.content, post.published, id))
-    post = cursor.fetchone()
-    if post is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"Post with id {id} could not be updated")
-    conn.commit()
-    return {"Data": post}
 
 # 00:00:10 Intro
 # 00:06:33 Project overview
