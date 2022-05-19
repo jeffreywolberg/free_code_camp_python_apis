@@ -4,13 +4,18 @@ from sqlalchemy.orm import sessionmaker
 from .passwords.main import get_password
 from .config import settings
 
-password = get_password("app/passwords/key.key",
-                        "app/passwords/encrypted_pass.txt")
+try:
+    password = get_password("app/passwords/key.key",
+                            "app/passwords/encrypted_pass.txt")
+    SQLALCHEMY_DATABASE_URL = f'postgresql://{settings.db_username}:{password}@{settings.db_hostname}:{settings.db_port}/{settings.db_name}'
+except:
+    SQLALCHEMY_DATABASE_URL = f'postgresql://{settings.db_username}:{settings.db_pwd}@{settings.db_hostname}:{settings.db_port}/{settings.db_name}'
+
+    
 
 # SQLALCHEMY_DATABASE_URL = 'postgresql://username:password@ip-address/db_name'
 
 # SQLALCHEMY_DATABASE_URL = f'postgresql://postgres:{password}@localhost/fastapi'
-SQLALCHEMY_DATABASE_URL = f'postgresql://{settings.db_username}:{password}@{settings.db_hostname}:{settings.db_port}/{settings.db_name}'
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

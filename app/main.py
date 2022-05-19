@@ -44,8 +44,8 @@ app.add_middleware(
 
 )
 
-password = get_password("app/passwords/key.key",
-                        "app/passwords/encrypted_pass.txt")
+# password = get_password("app/passwords/key.key",
+#                         "app/passwords/encrypted_pass.txt")
 
 app.include_router(post.router)
 app.include_router(user.router)

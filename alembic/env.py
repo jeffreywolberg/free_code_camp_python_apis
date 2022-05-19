@@ -8,10 +8,12 @@ from app.passwords.main import get_password
 from app.models import Base
 from app.config import settings
 
-password = get_password("app/passwords/key.key",
-                        "app/passwords/encrypted_pass.txt")
-
-SQLALCHEMY_DATABASE_URL = f'postgresql://{settings.db_username}:{password}@{settings.db_hostname}:{settings.db_port}/{settings.db_name}'
+try:
+    password = get_password("app/passwords/key.key",
+                            "app/passwords/encrypted_pass.txt")
+    SQLALCHEMY_DATABASE_URL = f'postgresql://{settings.db_username}:{password}@{settings.db_hostname}:{settings.db_port}/{settings.db_name}'
+except:
+    SQLALCHEMY_DATABASE_URL = f'postgresql://{settings.db_username}:{settings.db_pwd}@{settings.db_hostname}:{settings.db_port}/{settings.db_name}'
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

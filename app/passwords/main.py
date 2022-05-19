@@ -7,15 +7,13 @@ def get_password(key_file_path, enc_pass_path):
         with open(key_file_path, "r") as f:
             key = f.readline().encode()
     except Exception as e:
-        print("Error retrieving key from key file", e)
-        exit()
+        raise e
 
     try:
         with open(enc_pass_path, "r") as f:
             enc_pass = f.readline().encode()
     except Exception as e:
-        print("Error retrieving encrypted password from file", e)
-        exit()
+        raise e
     
     fernet = Fernet(key)
     return fernet.decrypt(enc_pass).decode()
