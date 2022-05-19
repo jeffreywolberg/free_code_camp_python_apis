@@ -15,6 +15,7 @@
 
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from .passwords.main import get_password
 from . import models
 from .database import engine
@@ -30,6 +31,18 @@ from .config import settings
 
 # models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
+
+# origins = ["httpdds://www.google.com"]
+origins = ["*"] # for any domain to be able to reach the API
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+
+)
 
 password = get_password("app/passwords/key.key",
                         "app/passwords/encrypted_pass.txt")
