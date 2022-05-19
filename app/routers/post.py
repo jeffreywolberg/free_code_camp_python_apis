@@ -23,7 +23,7 @@ def get_posts(db: Session = Depends(get_db),
               search: Optional[str] = ""):
     vote_count = func.count(models.Post.id)
     results = db.query(models.Post, vote_count.label("votes")).join(models.Vote, models.Post.id == models.Vote.post_id, isouter=True).group_by(
-        models.Post.id).order_by(vote_count.desc()).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
+        models.Post).order_by(vote_count.desc()).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
     # line below if only getting posts that belong to current user
     # posts = db.query(models.Post).filter(models.Post.owner_id == cur_user.id).all()
     # cursor.execute("SELECT * FROM posts")
@@ -53,7 +53,7 @@ def get_post(id: int, db: Session = Depends(get_db), cur_user: models.User = Dep
     # print(post)
     vote_count = func.count(models.Post.id)
     query_res = db.query(models.Post, vote_count.label("votes")).join(models.Vote, models.Post.id == models.Vote.post_id, isouter=True).group_by(
-        models.Post.id).filter(models.Post.id == id).first()
+        models.Post).filter(models.Post.id == id).first()
     post = query_res[0]
     votes = query_res[1]
     if not post:

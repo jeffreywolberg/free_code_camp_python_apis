@@ -22,7 +22,13 @@ from .routers import post, user, auth, vote
 from .config import settings
 
 # this creates a 'posts' table in postgres is none exists
-models.Base.metadata.create_all(bind=engine)
+
+# the line below creates the tables for you in case they aren't there
+# however, this is limited, and will not change an already existing table
+# even though it may have been updated. We use alembic for this. If we're using
+# alembic, there is no need for this line and we can comment it out
+
+# models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 password = get_password("app/passwords/key.key",
