@@ -13,6 +13,9 @@
 # User will not be able to recreate a proper signature because he doesn't have
 # the Server-API-password. The server can easily check if a signature is valid
 
+# Don't run any alembic *revisions* on the prod server
+# Only run them on the dev server, and then push them using git when they're done,
+# Then run alembi
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -55,7 +58,7 @@ app.include_router(vote.router)
 
 @app.get("/")
 async def root():
-    return {"message": "Hello Wold"}
+    return {"message": "Hello World!!"}
 
 
 # 00:00:10 Intro
